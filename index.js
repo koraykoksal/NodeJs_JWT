@@ -51,6 +51,8 @@ app.all('/', (req, res) => {
     })
 })
 
+// /auth
+app.use('/auth',require('./src/routes/auth.router'))
 // /departments
 app.use('/departments', require('./src/routes/department.router'))
 // /personnels
@@ -69,10 +71,24 @@ app.all('/', (req, res) => {
 
 
 app.use(async (req,res,next)=>{
+
+    const Personnel = require('./src/models/personnel.model')
+
+    req.isLogin = false
+
+    if (req.session?.id) {
+
+        const user = await Personnel.findOne({ _id: req.session.id })
+
+        // if (user && user.password == req.session.password) {
+        //     req.isLogin = true
+        // }
+        req.isLogin = user && user.password == req.session.password
+    }
+    console.log('isLogin: ', req.isLogin)
+    
     next()
 })
-
-
 
 
 
@@ -86,4 +102,4 @@ app.listen(PORT, () => console.log('http://127.0.0.1:' + PORT))
 
 /* ------------------------------------------------------- */
 // Syncronization (must be in commentLine):
-// require('./src/helpers/sync')()
+//require('./src/helpers/sync')()
